@@ -1,0 +1,6 @@
+@Labb2Webb_HostAddress = http://localhost:5266
+
+GET {{Labb2Webb_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
