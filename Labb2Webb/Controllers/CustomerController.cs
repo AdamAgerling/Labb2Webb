@@ -61,7 +61,7 @@ namespace Labb2Webb.Controllers
         {
             if (id != customer.Id)
             {
-                return BadRequest("Kund-ID matchar inte.");
+                return BadRequest("The Customer-ID doesn't match.");
             }
 
             await _customerRepository.UpdateCustomerAsync(customer);
