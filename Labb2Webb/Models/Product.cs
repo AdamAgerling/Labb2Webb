@@ -5,7 +5,8 @@ namespace Labb2Webb.Models
     public enum ProductStatus
     {
         In_Stock,
-        Out_Of_Stock
+        Out_Of_Stock,
+        Discontinued
     }
 
     public class Product
