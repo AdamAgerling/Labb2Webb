@@ -1,4 +1,5 @@
-﻿using Labb2Webb.Models;
+﻿using Labb2Webb.Extensions;
+using Labb2Webb.Models;
 using Labb2Webb.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,10 @@ namespace Labb2Webb.Controllers
             {
                 return BadRequest();
             }
+
+            product.ProductName = product.ProductName.ToLower().RemoveExtraSpaces();
+            product.ProductDescription = product.ProductDescription.ToLower().RemoveExtraSpaces();
+
             await _productRepository.AddProductAsync(product);
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
 
