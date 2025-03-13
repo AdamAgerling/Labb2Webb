@@ -1,12 +1,14 @@
 ﻿using Labb2Webb.Extensions;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Labb2Webb.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
@@ -35,6 +37,7 @@ namespace Labb2Webb.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
         {
             if (product == null)
@@ -51,6 +54,7 @@ namespace Labb2Webb.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
             if (id != product.Id)
@@ -63,6 +67,7 @@ namespace Labb2Webb.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             await _productRepository.DeleteProductAsync(id);
