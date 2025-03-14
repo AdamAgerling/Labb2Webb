@@ -105,12 +105,6 @@ namespace Labb2Webb.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-        public class LoginModel
-        {
-            public string Email { get; set; }
-            public string Password { get; set; }
-        }
     }
 }
 
