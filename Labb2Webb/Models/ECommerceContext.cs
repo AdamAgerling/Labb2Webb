@@ -14,6 +14,14 @@ namespace Labb2Webb.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Customer>()
+                .Property(c => c.Address)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Customer>()
+                .Property(c => c.Cellphone)
+                .IsRequired(false);
+
             base.OnModelCreating(modelBuilder);
         }
     }

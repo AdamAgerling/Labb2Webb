@@ -34,7 +34,7 @@ namespace Labb2Webb.Controllers
         }
 
         [HttpGet("email")]
-        public async Task<ActionResult<Customer>> GetCustomerByEmail([FromQuery] string email)
+        public async Task<ActionResult<Customer>> GetCustomerByEmail(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer == null)
@@ -52,7 +52,7 @@ namespace Labb2Webb.Controllers
                 return BadRequest();
             }
             await _customerRepository.AddCustomerAsync(customer);
-            return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
+            return CreatedAtAction(nameof(GetCustomerByEmail), new { email = customer.Email }, customer);
 
         }
 

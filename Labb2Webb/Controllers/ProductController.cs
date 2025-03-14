@@ -1,4 +1,6 @@
-﻿using Labb2Webb.Extensions;
+﻿using AutoMapper;
+using Labb2Webb.DTOs;
+using Labb2Webb.Extensions;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -12,49 +14,56 @@ namespace Labb2Webb.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
+        private readonly IMapper _mapper;
 
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductRepository productRepository, IMapper mapper)
         {
             _productRepository = productRepository;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetAllProducts()
         {
             var products = await _productRepository.GetAllProductsAsync();
-            return Ok(products);
+            var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return Ok(productDtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
             var product = await _productRepository.GetProductByIdAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
-            return Ok(product);
+            var productDto = _mapper.Map<ProductDto>(product);
+            return Ok(productDto);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
+        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto createProductDto)
         {
-            if (product == null)
+            if (createProductDto == null)
             {
                 return BadRequest();
             }
 
-            product.ProductName = product.ProductName.ToLower().RemoveExtraSpaces();
-            product.ProductDescription = product.ProductDescription.ToLower().RemoveExtraSpaces();
-
+            var product = _mapper.Map<Product>(createProductDto);
             await _productRepository.AddProductAsync(product);
-            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
 
+            var productDto = _mapper.Map<ProductDto>(product);
+
+            productDto.ProductName = product.ProductName?.RemoveExtraSpaces();
+            productDto.ProductDescription = product.ProductDescription.RemoveExtraSpaces();
+
+            return CreatedAtAction(nameof(GetProduct), new { id = productDto.Id }, productDto);
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
             if (id != product.Id)
@@ -67,7 +76,7 @@ namespace Labb2Webb.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             await _productRepository.DeleteProductAsync(id);

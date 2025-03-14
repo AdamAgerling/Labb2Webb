@@ -1,4 +1,6 @@
-﻿using Labb2Webb.Models;
+﻿using AutoMapper;
+using Labb2Webb.DTOs;
+using Labb2Webb.Models;
 using Labb2Webb.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,40 +11,48 @@ namespace Labb2Webb.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IMapper _mapper;
 
-        public OrderController(IOrderRepository orderRepository)
+        public OrderController(IOrderRepository orderRepository, IMapper mapper)
         {
             _orderRepository = orderRepository;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetAllOrders()
+        public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders()
         {
             var orders = await _orderRepository.GetAllOrdersAsync();
-            return Ok(orders);
+            var orderDto = _mapper.Map<IEnumerable<OrderDto>>(orders);
+            return Ok(orderDto);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrder(int id)
+        public async Task<ActionResult<OrderDto>> GetOrder(int id)
         {
             var order = await _orderRepository.GetOrderByIdAsync(id);
             if (order == null)
             {
                 return NotFound();
             }
-            return Ok(order);
+            var orderDto = _mapper.Map<OrderDto>(order);
+            return Ok(orderDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Order>> CreateOrder([FromBody] Order order)
+        public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderDto orderDto)
         {
-            if (order == null)
+            if (orderDto == null)
             {
                 return BadRequest();
             }
 
+            var order = _mapper.Map<Order>(orderDto);
             await _orderRepository.AddOrderAsync(order);
-            return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
+
+            var createdOrderDto = _mapper.Map<OrderDto>(order);
+
+            return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, createdOrderDto);
         }
 
         [HttpPut("{id}")]
