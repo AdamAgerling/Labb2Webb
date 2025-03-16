@@ -69,7 +69,7 @@ namespace Labb2Webb.Controllers
             var customer = await _customerRepository.GetByEmailAsync(login.Email);
             if (customer == null)
             {
-                return Unauthorized("Invalid credentials.");
+                return Unauthorized("This user does not exist.");
             }
 
             var passwordHasher = new PasswordHasher<Customer>();
@@ -78,7 +78,7 @@ namespace Labb2Webb.Controllers
 
             if (result == PasswordVerificationResult.Failed)
             {
-                return Unauthorized("Invalid credentials.");
+                return Unauthorized("Invalid Password.");
             }
 
             var token = GenerateJwtToken(customer);
@@ -92,14 +92,14 @@ namespace Labb2Webb.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, customer.Email),
-                new Claim(ClaimTypes.Role, customer.Role.ToString())
+                new Claim(ClaimTypes.Role, customer.Role.ToString()),
+                new Claim(ClaimTypes.Name, customer.Email)
             };
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: credentials
                 );
 
@@ -107,5 +107,3 @@ namespace Labb2Webb.Controllers
         }
     }
 }
-
-

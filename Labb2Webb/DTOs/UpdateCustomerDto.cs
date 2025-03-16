@@ -2,16 +2,19 @@
 
 namespace Labb2Webb.DTOs
 {
-    public class CreateCustomerDto
+    public class UpdateCustomerDto
     {
+        [Required]
+        public string FirstName { get; set; }
+
+        [Required]
+        public string LastName { get; set; }
+
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-        [Required]
-        public string FirstName { get; set; }
-        [Required]
-        public string LastName { get; set; }
-        [Required]
-        public string Password { get; set; }
+
+        public string? Cellphone { get; set; }
+        public string? Address { get; set; }
     }
 }

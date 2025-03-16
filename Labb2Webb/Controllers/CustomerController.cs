@@ -1,5 +1,8 @@
-﻿using Labb2Webb.Models;
+﻿using AutoMapper;
+using Labb2Webb.DTOs;
+using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Labb2Webb.Controllers
@@ -9,31 +12,24 @@ namespace Labb2Webb.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerRepository _customerRepository;
+        private readonly IMapper _mapper;
 
-        public CustomerController(ICustomerRepository customerRepository)
+        public CustomerController(ICustomerRepository customerRepository, IMapper mapper)
         {
             _customerRepository = customerRepository;
+            _mapper = mapper;
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Customer>>> GetAllCustomers()
         {
             var customers = await _customerRepository.GetAllCustomersAsync();
             return Ok(customers);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Customer>> GetCustomer(int id)
-        {
-            var customer = await _customerRepository.GetCustomerByIdAsync(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
-            return Ok(customer);
-        }
-
         [HttpGet("email")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Customer>> GetCustomerByEmail(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
@@ -56,22 +52,49 @@ namespace Labb2Webb.Controllers
 
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomer(int id, [FromBody] Customer customer)
+        [HttpPut("{email}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateCustomer(string email, [FromBody] UpdateCustomerDto updateDto)
         {
-            if (id != customer.Id)
+            if (!email.Equals(updateDto.Email, StringComparison.OrdinalIgnoreCase))
             {
-                return BadRequest("The Customer-Id does not match.");
+                return BadRequest("The email in the URL does not match the email in the request body.");
             }
 
-            await _customerRepository.UpdateCustomerAsync(customer);
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUserEmail = User.Identity.Name;
+                if (!email.Equals(currentUserEmail, StringComparison.OrdinalIgnoreCase))
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to update another user's account.");
+                }
+            }
+
+            var existingCustomer = await _customerRepository.GetByEmailAsync(email);
+            if (existingCustomer == null)
+            {
+                return NotFound();
+            }
+
+            _mapper.Map(updateDto, existingCustomer);
+
+            await _customerRepository.UpdateCustomerAsync(existingCustomer);
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer(int id)
+        [HttpDelete("{email}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteCustomer(string email)
         {
-            await _customerRepository.DeleteCustomerAsync(id);
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUserEmail = User.Identity.Name;
+                if (!email.Equals(currentUserEmail, StringComparison.OrdinalIgnoreCase))
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to delete another user's account.");
+                }
+            }
+            await _customerRepository.DeleteCustomerByEmailAsync(email);
             return NoContent();
         }
     }

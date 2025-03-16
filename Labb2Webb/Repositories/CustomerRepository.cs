@@ -18,10 +18,10 @@ namespace Labb2Webb.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteCustomerAsync(int id)
+        public async Task DeleteCustomerByEmailAsync(string email)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer != null)
+            var customer = await _context.Customers
+            .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower()); if (customer != null)
             {
                 _context.Customers.Remove(customer);
                 await _context.SaveChangesAsync();

@@ -11,6 +11,10 @@ namespace Labb2Webb.Mapping
             CreateMap<Customer, CustomerDto>();
             CreateMap<CreateCustomerDto, Customer>().ForMember(dest => dest.Id, opt => opt.Ignore());
 
+            CreateMap<UpdateCustomerDto, Customer>()
+                .ForMember(dest => dest.Role, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
             CreateMap<Product, ProductDto>().ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
             CreateMap<CreateProductDto, Product>().ForMember(dest => dest.Id, opt => opt.Ignore());
 

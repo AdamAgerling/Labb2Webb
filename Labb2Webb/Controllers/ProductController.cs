@@ -42,8 +42,8 @@ namespace Labb2Webb.Controllers
             return Ok(productDto);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto createProductDto)
         {
             if (createProductDto == null)

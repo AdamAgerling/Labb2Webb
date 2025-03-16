@@ -9,6 +9,6 @@ namespace Labb2Webb.Repositories
         Task<Customer> GetByEmailAsync(string email);
         Task AddCustomerAsync(Customer customer);
         Task UpdateCustomerAsync(Customer customer);
-        Task DeleteCustomerAsync(int id);
+        Task DeleteCustomerByEmailAsync(string email);
     }
 }
