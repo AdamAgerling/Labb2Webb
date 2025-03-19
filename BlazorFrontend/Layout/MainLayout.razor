@@ -1,16 +1,70 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+@using BlazorFrontend.Providers
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+<div>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand text fw-bold fs-3" href="/">ynet</a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        <AuthorizeView>
+                            <Authorized>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/profile"> @context.User.Identity.Name</a>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="btn btn-link nav-link" @onclick="Logout">Logout</button>
+                                </li>
+                            </Authorized>
+                            <NotAuthorized>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/login">
+                                    <i class="bi bi-person-circle"></i>
+                                    Login
+                                </a>
+                            </li>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                        <li>
+                            <button type="button" class="btn btn-success px-3">
+                                <i class="bi bi-cart3 pe-1"></i>
+                                Cart
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="row">
+        <div class="col-md-3 sidebar">
+            <NavMenu />
+        </div>
+        <div class="col-md-9">
+            @Body
+        </div>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+    <footer class="mt-3 text-center bg-dark text-white">
+        &copy; 2025 ynet
+    </footer>
 </div>
+
+@code {
+    private async Task Logout()
+    {
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        if (AuthStateProvider is CustomAuthenticationStateProvider customAuthProvider)
+        {
+            customAuthProvider.MarkUserAsLoggedOut();
+        }
+        Navigation.NavigateTo("/", true);
+    }
+}

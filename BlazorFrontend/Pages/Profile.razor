@@ -1,0 +1,46 @@
+﻿@page "/profile"
+@using BlazorFrontend.Services
+@using Labb2Webb.Shared.DTOs
+@inject CustomerService CustomerService
+
+<h3>My Profile</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+else if (customerProfile == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">@customerProfile.FirstName @customerProfile.LastName</h2>
+            <p class="card-text">
+                <strong>Email:</strong> @customerProfile.Email <br />
+                <strong>Phone:</strong> @customerProfile.Cellphone <br />
+                <strong>Address:</strong> @customerProfile.Address
+            </p>
+        </div>
+    </div>
+}
+
+@code {
+    private CustomerDto customerProfile;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            customerProfile = await CustomerService.GetLoggedInCustomerProfileAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            Console.WriteLine("Error loading profile: " + ex);
+        }
+    }
+}

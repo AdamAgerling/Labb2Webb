@@ -1,4 +1,4 @@
-﻿namespace Labb2Webb.Shared
+﻿namespace Labb2Webb.Shared.DTOs
 {
     public class ProductDto
     {

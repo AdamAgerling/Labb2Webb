@@ -40,6 +40,25 @@ namespace Labb2Webb.Controllers
             return Ok(customer);
         }
 
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<ActionResult<CustomerDto>> GetMyProfile()
+        {
+            var email = User.Identity.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                return Unauthorized();
+            }
+
+            var customer = await _customerRepository.GetByEmailAsync(email);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            var customerDto = _mapper.Map<CustomerDto>(customer);
+            return Ok(customerDto);
+        }
         [HttpPost]
         public async Task<ActionResult<Customer>> CreateCustomer([FromBody] Customer customer)
         {

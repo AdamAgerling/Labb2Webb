@@ -5,6 +5,7 @@ using AutoMapper;
 using Labb2Webb.DTOs;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Labb2Webb.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +20,6 @@ namespace Labb2Webb.Controllers
         private readonly IConfiguration _configuration;
         private readonly ICustomerRepository _customerRepository;
         private readonly IMapper _mapper;
-
 
 
         public AuthController(IConfiguration configuration, ICustomerRepository customerRepository, IMapper mapper)

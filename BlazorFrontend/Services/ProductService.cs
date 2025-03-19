@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Json;
-using Labb2Webb.Shared;
+using Labb2Webb.Shared.DTOs;
 
 public class ProductService
 {
