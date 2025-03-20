@@ -12,6 +12,17 @@ namespace Labb2Webb.Repositories
             _context = context;
         }
 
+        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(string category)
+        {
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                return new List<Product>();
+            }
+
+            return await _context.Products
+                .Where(p => p.ProductCategory.ToLower() == category.ToLower())
+                .ToListAsync();
+        }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {

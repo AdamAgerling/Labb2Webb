@@ -43,6 +43,18 @@ namespace Labb2Webb.Controllers
             return Ok(productDtos);
         }
 
+        [HttpGet("category/{category}")]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsByCategory(string category)
+        {
+            var products = await _productRepository.GetProductsByCategoryAsync(category);
+            if (products == null || !products.Any())
+            {
+                return NotFound("No products were found matching the search criteria");
+            }
+            var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+            return Ok(productDtos);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {

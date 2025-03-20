@@ -1,0 +1,30 @@
+﻿@page "/products/{category}"
+@using Labb2Webb.Shared.DTOs
+
+@inject ProductService ProductService
+
+<h3>@category</h3>
+
+@if (products == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var product in products)
+        {
+            <li>@product.ProductName</li>
+        }
+    </ul>
+}
+
+@code {
+    [Parameter] public string category { get; set; }
+    private IEnumerable<ProductDto> products;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        products = await ProductService.GetProductsByCategoryAsync(category);
+    }
+}
