@@ -23,6 +23,11 @@ namespace Labb2Webb.Repositories
             return await _context.Products.FindAsync(id);
         }
 
+        public async Task<IEnumerable<Product>> SearchProductsByNameAsync(string name)
+        {
+            return await _context.Products.Where(p => p.ProductName.Contains(name)).ToListAsync();
+        }
+
         public async Task<Product> GetByProductNumberAsync(string productNumber)
         {
             return await _context.Products.FirstOrDefaultAsync(p => p.ProductNumber == productNumber);
