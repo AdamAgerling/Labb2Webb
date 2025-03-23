@@ -48,6 +48,11 @@ namespace Labb2Webb.Controllers
                 return BadRequest("Invalid registration data");
             }
 
+            var textInfo = System.Globalization.CultureInfo.CurrentCulture.TextInfo;
+            createCustomerDto.FirstName = textInfo.ToTitleCase(createCustomerDto.FirstName.ToLower());
+            createCustomerDto.LastName = textInfo.ToTitleCase(createCustomerDto.LastName.ToLower());
+
+
             var customer = _mapper.Map<Customer>(createCustomerDto);
             customer.Email = createCustomerDto.Email.ToLower();
 
@@ -93,7 +98,8 @@ namespace Labb2Webb.Controllers
             var claims = new[]
             {
                 new Claim(ClaimTypes.Role, customer.Role.ToString()),
-                new Claim(ClaimTypes.Name, customer.Email)
+                new Claim(ClaimTypes.Name, customer.Email),
+                new Claim("FullName", $"{customer.FirstName} {customer.LastName}")
             };
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],

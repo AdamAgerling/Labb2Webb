@@ -1,0 +1,41 @@
+﻿@page "/product/{productNumber}/{productName}"
+@using BlazorFrontend.Services
+@using Labb2Webb.Shared.DTOs
+@inject ProductService ProductService
+@inject CartService CartService
+@inject NavigationManager Navigation
+
+<h3>@product?.ProductName</h3>
+
+@if (product == null)
+{
+    <p>Laddar...</p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">@product.ProductName</h5>
+            <p class="card-text">@product.ProductDescription</p>
+            <p><strong>Price:</strong> $@product.Price</p>
+            <button class="btn btn-success" @onclick="AddToCart">Add to cart</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string ProductNumber { get; set; }
+    [Parameter] public string ProductName { get; set; }
+    private ProductDto product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await ProductService.GetProductByNameAsync(ProductNumber, ProductName);
+    }
+
+    private void AddToCart()
+    {
+        CartService.AddToCart(product);
+        Navigation.NavigateTo("/cart"); 
+    }
+}

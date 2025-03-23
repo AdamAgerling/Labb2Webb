@@ -44,6 +44,12 @@ namespace Labb2Webb.Repositories
             return await _context.Products.FirstOrDefaultAsync(p => p.ProductNumber == productNumber);
         }
 
+        public async Task<Product> GetProductByNumberAndNameAsync(string productNumber, string productName)
+        {
+            return await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductNumber == productNumber && p.ProductName == productName);
+        }
+
         public async Task AddProductAsync(Product product)
         {
             await _context.Products.AddAsync(product);

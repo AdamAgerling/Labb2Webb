@@ -1,30 +1,58 @@
 ﻿@page "/products/{category}"
+@using BlazorFrontend.Services
 @using Labb2Webb.Shared.DTOs
-
 @inject ProductService ProductService
+@inject NavigationManager Navigation
+@inject CartService CartService
 
 <h3>@category</h3>
 
-@if (products == null)
-{
-    <p>Loading...</p>
-}
-else
-{
-    <ul>
-        @foreach (var product in products)
+
+<div class="list-group">
+    @if (Products == null || !Products.Any())
+    {
+        <div class="list-group-item">
+            <em>Inga produkter att visa.</em>
+        </div>
+    }
+    else
+    {
+        @foreach (var product in Products)
         {
-            <li>@product.ProductName</li>
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="cursor: pointer"
+                 @onclick="() => GoToProduct(product.ProductNumber, product.ProductName)">
+                <div class="d-flex flex-column">
+                    <strong>@product.ProductName</strong>
+                    <small class="text-muted">@product.ProductDescription</small>
+                    <div><strong>$@product.Price</strong></div>
+                </div>
+                <button class="btn btn-sm btn-success"
+                        @onclick:stopPropagation="true"
+                        @onclick="(e) => AddToCart(product)">
+                    <i class="bi bi-cart3 pe-1"></i>
+                    Add to cart
+                </button>
+            </div>
         }
-    </ul>
-}
+    }
+</div>
 
 @code {
     [Parameter] public string category { get; set; }
-    private IEnumerable<ProductDto> products;
+    [Parameter] public IEnumerable<ProductDto> Products { get; set; }
+
+    private void GoToProduct(string productNumber, string productName)
+    {
+        Navigation.NavigateTo($"/product/{productNumber}/{productName}");
+    }
+
+    private void AddToCart(ProductDto product)
+    {
+        CartService.AddToCart(product);
+    }
 
     protected override async Task OnParametersSetAsync()
     {
-        products = await ProductService.GetProductsByCategoryAsync(category);
+        Products = await ProductService.GetProductsByCategoryAsync(category);
     }
 }

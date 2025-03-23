@@ -18,4 +18,9 @@ public class ProductService
     {
         return await _httpClient.GetFromJsonAsync<IEnumerable<ProductDto>>($"api/Product/category/{category}");
     }
+
+    public async Task<ProductDto> GetProductByNameAsync(string productNumber, string productName)
+    {
+        return await _httpClient.GetFromJsonAsync<ProductDto>($"api/Product/{productNumber}/{productName}");
+    }
 }

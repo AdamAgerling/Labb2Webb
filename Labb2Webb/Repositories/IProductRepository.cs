@@ -9,6 +9,7 @@ namespace Labb2Webb.Repositories
         Task<IEnumerable<Product>> SearchProductsByNameAsync(string name);
         Task<IEnumerable<Product>> GetProductsByCategoryAsync(string name);
         Task<Product> GetByProductNumberAsync(string productNumber);
+        Task<Product> GetProductByNumberAndNameAsync(string productNumber, string productName);
         Task AddProductAsync(Product product);
         Task UpdateProductAsync(Product product);
         Task DeleteProductAsync(int id);

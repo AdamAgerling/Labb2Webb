@@ -67,6 +67,16 @@ namespace Labb2Webb.Controllers
             return Ok(productDto);
         }
 
+        [HttpGet("{productNumber}/{productName}")]
+        public async Task<ActionResult<ProductDto>> GetProductByNumberAndName(string productNumber, string productName)
+        {
+            var product = await _productRepository.GetProductByNumberAndNameAsync(productNumber, productName);
+            if (product == null)
+                return NotFound();
+
+            var productDto = _mapper.Map<ProductDto>(product);
+            return Ok(productDto);
+        }
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto createProductDto)
