@@ -54,7 +54,7 @@
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
                 await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
 
-                if (AuthStateProvider is CustomAuthenticationStateProvider customAuthProvider)
+                if (AuthStateProvider is CustomAuthStateProvider customAuthProvider)
                 {
                     customAuthProvider.MarkUserAsAuthenticated(loginModel.Email);
                 }

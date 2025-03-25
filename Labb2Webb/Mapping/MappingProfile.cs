@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Labb2Webb.DTOs;
 using Labb2Webb.Models;
+using Labb2Webb.Shared.DTOs;
 
 namespace Labb2Webb.Mapping
 {

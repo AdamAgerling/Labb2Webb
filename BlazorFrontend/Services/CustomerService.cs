@@ -27,5 +27,9 @@ namespace BlazorFrontend.Services
             }
             return await _httpClient.GetFromJsonAsync<CustomerDto>("api/Customer/profile");
         }
+        public async Task<HttpResponseMessage> UpdateCustomerAsync(UpdateCustomerDto updateDto)
+        {
+            return await _httpClient.PutAsJsonAsync($"api/customer/{updateDto.Email}", updateDto);
+        }
     }
 }

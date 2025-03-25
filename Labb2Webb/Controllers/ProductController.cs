@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using Labb2Webb.DTOs;
 using Labb2Webb.Extensions;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Labb2Webb.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

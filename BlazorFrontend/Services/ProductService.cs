@@ -23,4 +23,9 @@ public class ProductService
     {
         return await _httpClient.GetFromJsonAsync<ProductDto>($"api/Product/{productNumber}/{productName}");
     }
+    public async Task<IEnumerable<ProductDto>> SearchProductsByNameAsync(string productName)
+    {
+        var result = await _httpClient.GetFromJsonAsync<IEnumerable<ProductDto>>($"api/Product/search?name={productName}");
+        return result ?? new List<ProductDto>();
+    }
 }

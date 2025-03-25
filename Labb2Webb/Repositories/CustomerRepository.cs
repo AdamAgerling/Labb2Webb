@@ -35,7 +35,7 @@ namespace Labb2Webb.Repositories
 
         public async Task<Customer> GetByEmailAsync(string email)
         {
-            return await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
+            return await _context.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Email == email);
         }
 
         public async Task<Customer> GetCustomerByIdAsync(int id)

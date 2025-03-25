@@ -8,6 +8,7 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @inject CustomerService CustomerService
+@inject ProductService ProductService
 
 <div>
     <header>
@@ -15,31 +16,33 @@
             <div class="container">
                 <a class="navbar-brand text fw-bold fs-3" href="/">ynet</a>
                 <div class="collapse navbar-collapse">
-                    <div class="align-content-center"><input type="text" placeholder="Search for a product..."/></div>
+                    <div class="position-relative d-flex justify-content-center">
+                        <InputText @bind-Value="searchTerm" class="form-control w-100" placeholder="Search for a product..."
+                        @oninput="OnInputChanged" />
+                        @if (searchResults != null && searchResults.Any())
+                        {
+                            <ul class="list-group position-absolute w-100" style="top: 100%; z-index: 1000; cursor: pointer;">
+                                @foreach (var product in searchResults)
+                                {
+                                    <li class="list-group-item list-group-item-action" @onclick="() => NavigateToProduct(product)">
+                                        @product.ProductName
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
                     <ul class="navbar-nav ms-auto">
                         <AuthorizeView>
                             <Authorized>
-                                @{
-                                    var fullName = context.User.FindFirst("FullName")?.Value;
-                                    var displayName = !string.IsNullOrWhiteSpace(fullName) ? fullName : context.User.Identity.Name;
-                                    if (!string.IsNullOrWhiteSpace(displayName))
-                                    {
-                                        var parts = displayName.Split(' ');
-                                        if (parts.Length >= 2)
-                                        {
-                                            displayName = $"{parts[0]} {parts[1].Substring(0, 1)}.";
-                                        }
-                                    }
-                                }
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/profile"> @displayName</a>
+                                <li class="nav-item mt-2">
+                                    <a class="nav-link" href="/profile"> @GetDisplayName(context)</a>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item mt-2">
                                     <button class="btn btn-link nav-link" @onclick="Logout">Logout</button>
                                 </li>
                             </Authorized>
                             <NotAuthorized>
-                                <li class="nav-item">
+                                <li class="nav-item mt-2">
                                     <a class="nav-link" href="/login">
                                         <i class="bi bi-person-circle"></i>
                                         Login
@@ -48,10 +51,13 @@
                             </NotAuthorized>
                         </AuthorizeView>
                         <li>
-                            <button type="button" class="btn btn-success px-3">
-                                <i class="bi bi-cart3 pe-1"></i>
-                                Cart
-                            </button>
+                            <NavLink class="nav-link d-flex align-items-center" href="cart">
+                                <button type="button" class="btn btn-success px-3">
+                                    <i class="bi bi-cart3 pe-1"></i>
+                                    Cart
+                                </button>
+                            </NavLink>
+
                         </li>
                     </ul>
                 </div>
@@ -75,6 +81,8 @@
 
 @code {
     private CustomerDto customerProfile;
+    private string searchTerm = "";
+    private IEnumerable<ProductDto> searchResults;
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,15 +96,47 @@
         }
     }
 
+    private string GetDisplayName(AuthenticationState authState) {
+        var fullName = authState.User.FindFirst("FullName")?.Value;
+        var displayName = !string.IsNullOrWhiteSpace(fullName) ? fullName : authState.User.Identity.Name;
+        if (!string.IsNullOrWhiteSpace(displayName))
+        {
+            var parts = displayName.Split(' ');
+            if (parts.Length >= 2)
+            {
+                return $"{parts[0]} {parts[1].Substring(0, 1)}.";
+            }
+        }
+        return displayName;
+    }
 
     private async Task Logout()
     {
         await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
-        if (AuthStateProvider is CustomAuthenticationStateProvider customAuthProvider)
+        if (AuthStateProvider is CustomAuthStateProvider customAuthProvider)
         {
             customAuthProvider.MarkUserAsLoggedOut();
         }
         Navigation.NavigateTo("/", true);
     }
 
+    private async Task OnInputChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchResults = null;
+        }
+        else
+        {
+            searchResults = await ProductService.SearchProductsByNameAsync(searchTerm);
+        }
+    }
+
+    private void NavigateToProduct(ProductDto product)
+    {
+        searchTerm = "";
+        searchResults = null;
+        Navigation.NavigateTo($"/product/{product.ProductNumber}/{product.ProductName}");
+    }
 }

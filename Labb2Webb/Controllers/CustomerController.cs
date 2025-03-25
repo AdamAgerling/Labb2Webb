@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
-using Labb2Webb.DTOs;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Labb2Webb.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Labb2Webb.Controllers
@@ -59,6 +60,7 @@ namespace Labb2Webb.Controllers
             var customerDto = _mapper.Map<CustomerDto>(customer);
             return Ok(customerDto);
         }
+
         [HttpPost]
         public async Task<ActionResult<Customer>> CreateCustomer([FromBody] Customer customer)
         {
@@ -95,7 +97,14 @@ namespace Labb2Webb.Controllers
                 return NotFound();
             }
 
+
             _mapper.Map(updateDto, existingCustomer);
+
+            if (!string.IsNullOrWhiteSpace(updateDto.NewPassword))
+            {
+                var passwordHasher = new PasswordHasher<Customer>();
+                existingCustomer.PasswordHash = passwordHasher.HashPassword(existingCustomer, updateDto.NewPassword);
+            }
 
             await _customerRepository.UpdateCustomerAsync(existingCustomer);
             return NoContent();

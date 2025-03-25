@@ -2,12 +2,14 @@
 @using BlazorFrontend.Services
 @using Labb2Webb.Shared.DTOs
 @inject CustomerService CustomerService
+@inject NavigationManager Navigation
+@inject HttpClient Http
 
-<h3>My Profile</h3>
+<PageTitle>My Profile</PageTitle>
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <p class="text-danger">@errorMessage</p>
+    <div class="alert alert-danger">@errorMessage</div>
 }
 else if (customerProfile == null)
 {
@@ -18,29 +20,234 @@ else
     <div class="card">
         <div class="card-body">
             <h2 class="card-title">@customerProfile.FirstName @customerProfile.LastName</h2>
-            <p class="card-text">
-                <strong>Email:</strong> @customerProfile.Email <br />
-                <strong>Phone:</strong> @customerProfile.Cellphone <br />
-                <strong>Address:</strong> @customerProfile.Address
-            </p>
+            <div class="mb-2">
+                <strong>Email:</strong>
+                <span class="ms-2">@customerProfile.Email</span>
+
+            </div>
+            <div class="mb-2">
+                <strong>First Name:</strong>
+                @if (isEditFirstName)
+                {
+                    <InputText @bind-Value="updateCustomer.FirstName" class="form-control d-inline w-auto ms-2" />
+                    <button class="btn btn-sm btn-primary ms-2" @onclick="SaveFirstName">Save</button>
+                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelFirstNameEdit">Cancel</button>
+                }
+                else
+                {
+                    <span class="ms-2">@customerProfile.FirstName</span>
+                    <button class="btn btn-link btn-sm" @onclick="ToggleFirstNameEdit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                }
+            </div>
+            <div class="mb-2">
+                <strong>Last Name:</strong>
+                @if (isEditLastName)
+                {
+                    <InputText @bind-Value="updateCustomer.LastName" class="form-control d-inline w-auto ms-2" />
+                    <button class="btn btn-sm btn-primary ms-2" @onclick="SaveLastName">Save</button>
+                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelLastNameEdit">Cancel</button>
+                }
+                else
+                {
+                    <span class="ms-2">@customerProfile.LastName</span>
+                    <button class="btn btn-link btn-sm" @onclick="ToggleLastNameEdit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                }
+            </div>
+
+
+            <div class="mb-2">
+                <strong>Phone:</strong>
+                @if (isEditPhone)
+                {
+                    <InputText @bind-Value="updateCustomer.Cellphone" class="form-control d-inline w-auto ms-2" />
+                    <button class="btn btn-sm btn-primary ms-2" @onclick="SavePhone">Save</button>
+                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelPhoneEdit">Cancel</button>
+                }
+                else
+                {
+                    <span class="ms-2">@customerProfile.Cellphone</span>
+                    <button class="btn btn-link btn-sm" @onclick="TogglePhoneEdit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                }
+            </div>
+            <div class="mb-2">
+                <strong>Address:</strong>
+                @if (isEditAddress)
+                {
+                    <InputText @bind-Value="updateCustomer.Address" class="form-control d-inline w-auto ms-2" />
+                    <button class="btn btn-sm btn-primary ms-2" @onclick="SaveAddress">Save</button>
+                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelAddressEdit">Cancel</button>
+                }
+                else
+                {
+                    <span class="ms-2">@customerProfile.Address</span>
+                    <button class="btn btn-link btn-sm" @onclick="ToggleAddressEdit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                }
+            </div>
+            <div class="mb-2">
+                <button class="btn btn-link btn-sm mb-2" @onclick="TogglePasswordEdit"> Change password</button>
+                @if (isEditPassword)
+                {
+                    <div>
+                        <div class="d-flex flex-column w-25">
+                        <label for="password1">New Password</label>
+                         <InputText id="password1" type="password" @bind-Value="updateCustomer.NewPassword" class="form-control d-inline w-auto ms-2" />
+                        </div>
+                        <div class="d-flex flex-column w-25">
+                        <label for="password2">Confirm Password</label>
+                        <InputText id="password2" type="password" @bind-Value="updateCustomer.VerifyNewPassword" class="form-control d-inline w-auto ms-2" />
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary ms-2" @onclick="SavePassword">Save</button>
+                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelPasswordEdit">Cancel</button>
+                }
+
+            </div>
+
+
         </div>
     </div>
 }
 
+<h2>Order History</h2>
+
 @code {
     private CustomerDto customerProfile;
+    private UpdateCustomerDto updateCustomer;
     private string errorMessage;
+
+    private bool isEditFirstName = false;
+    private bool isEditLastName = false;
+    private bool isEditPhone = false;
+    private bool isEditAddress = false;
+    private bool isEditPassword = false;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             customerProfile = await CustomerService.GetLoggedInCustomerProfileAsync();
+            updateCustomer = new UpdateCustomerDto
+                {
+                    Email = customerProfile.Email,
+                    FirstName = customerProfile.FirstName,
+                    LastName = customerProfile.LastName,
+                    Cellphone = customerProfile.Cellphone,
+                    Address = customerProfile.Address
+                };
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
-            Console.WriteLine("Error loading profile: " + ex);
+            errorMessage = "Error loading profile: " + ex.Message;
+        }
+    }
+
+    private void ToggleFirstNameEdit() => isEditFirstName = true;
+    private void CancelFirstNameEdit()
+    {
+        isEditFirstName = false;
+        updateCustomer.FirstName = customerProfile.FirstName;
+    }
+    private async Task SaveFirstName()
+    {
+        var response = await CustomerService.UpdateCustomerAsync(updateCustomer);
+        if (response.IsSuccessStatusCode)
+        {
+            customerProfile.FirstName = updateCustomer.FirstName;
+            isEditFirstName = false;
+        }
+        else
+        {
+            errorMessage = "Error updating FirstName.";
+        }
+    }
+
+    private void ToggleLastNameEdit() => isEditLastName = true;
+    private void CancelLastNameEdit()
+    {
+        isEditLastName = false;
+        updateCustomer.LastName = customerProfile.LastName;
+    }
+    private async Task SaveLastName()
+    {
+        var response = await CustomerService.UpdateCustomerAsync(updateCustomer);
+        if (response.IsSuccessStatusCode)
+        {
+            customerProfile.LastName = updateCustomer.LastName;
+            isEditLastName = false;
+        }
+        else
+        {
+            errorMessage = "Error updating lastname.";
+        }
+    }
+
+
+    private void TogglePhoneEdit() => isEditPhone = true;
+    private void CancelPhoneEdit()
+    {
+        isEditPhone = false;
+        updateCustomer.Cellphone = customerProfile.Cellphone;
+    }
+    private async Task SavePhone()
+    {
+        var response = await CustomerService.UpdateCustomerAsync(updateCustomer);
+        if (response.IsSuccessStatusCode)
+        {
+            customerProfile.Cellphone = updateCustomer.Cellphone;
+            isEditPhone = false;
+        }
+        else
+        {
+            errorMessage = "Error updating phone.";
+        }
+    }
+
+    private void ToggleAddressEdit() => isEditAddress = true;
+    private void CancelAddressEdit()
+    {
+        isEditAddress = false;
+        updateCustomer.Address = customerProfile.Address;
+    }
+    private async Task SaveAddress()
+    {
+        var response = await CustomerService.UpdateCustomerAsync(updateCustomer);
+        if (response.IsSuccessStatusCode)
+        {
+            customerProfile.Address = updateCustomer.Address;
+            isEditAddress = false;
+        }
+        else
+        {
+            errorMessage = "Error updating address.";
+        }
+    }
+
+    private void TogglePasswordEdit() => isEditPassword = true;
+    private void CancelPasswordEdit()
+    {
+        isEditPassword = false;
+        updateCustomer.NewPassword = updateCustomer.NewPassword;
+    }
+    private async Task SavePassword()
+    {
+        var response = await CustomerService.UpdateCustomerAsync(updateCustomer);
+        if (response.IsSuccessStatusCode)
+        {
+            updateCustomer.NewPassword = String.Empty;
+            updateCustomer.VerifyNewPassword = String.Empty;
+            isEditPassword = false;
+        }
+        else
+        {
+            errorMessage = "Error updating Password.";
         }
     }
 }

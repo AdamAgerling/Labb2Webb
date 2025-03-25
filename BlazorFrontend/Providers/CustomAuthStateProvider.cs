@@ -10,12 +10,12 @@ using Microsoft.JSInterop;
 
 namespace BlazorFrontend.Providers
 {
-    public class CustomAuthenticationStateProvider : AuthenticationStateProvider
+    public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         private readonly IJSRuntime _jsRuntime;
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
 
-        public CustomAuthenticationStateProvider(IJSRuntime jsRuntime)
+        public CustomAuthStateProvider(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime;
         }

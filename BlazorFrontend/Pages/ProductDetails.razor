@@ -28,7 +28,7 @@ else
     [Parameter] public string ProductName { get; set; }
     private ProductDto product;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         product = await ProductService.GetProductByNameAsync(ProductNumber, ProductName);
     }

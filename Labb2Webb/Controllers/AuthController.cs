@@ -2,9 +2,9 @@
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
-using Labb2Webb.DTOs;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Labb2Webb.Shared.DTOs;
 using Labb2Webb.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

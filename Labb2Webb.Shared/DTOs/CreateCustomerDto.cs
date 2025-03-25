@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Labb2Webb.Shared.DTOs
 {
@@ -12,6 +13,12 @@ namespace Labb2Webb.Shared.DTOs
         [Required]
         public string LastName { get; set; }
         [Required]
-        public string Password { get; set; }
+        [PasswordPropertyText]
+        public string Password { get; set; } = string.Empty;
+        [Required]
+        [PasswordPropertyText]
+        [Compare("Password")]
+        public string VerifyPassword { get; set; } = string.Empty;
+
     }
 }
