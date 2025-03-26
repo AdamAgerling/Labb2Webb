@@ -1,15 +1,11 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using AutoMapper;
+﻿using AutoMapper;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Labb2Webb.Services;
 using Labb2Webb.Shared.DTOs;
 using Labb2Webb.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-
 
 namespace Labb2Webb.Controllers
 {
@@ -20,13 +16,13 @@ namespace Labb2Webb.Controllers
         private readonly IConfiguration _configuration;
         private readonly ICustomerRepository _customerRepository;
         private readonly IMapper _mapper;
-
-
-        public AuthController(IConfiguration configuration, ICustomerRepository customerRepository, IMapper mapper)
+        private JwtTokenGenerator _tokenGenerator { get; set; }
+        public AuthController(IConfiguration configuration, ICustomerRepository customerRepository, IMapper mapper, JwtTokenGenerator tokenGenerator)
         {
             _configuration = configuration;
             _customerRepository = customerRepository;
             _mapper = mapper;
+            _tokenGenerator = tokenGenerator;
         }
 
         [HttpGet("email/{email}", Name = "GetCustomerByEmail")]
@@ -86,30 +82,8 @@ namespace Labb2Webb.Controllers
                 return Unauthorized("Invalid Password.");
             }
 
-            var token = GenerateJwtToken(customer);
+            var token = _tokenGenerator.GenerateJwtToken(customer);
             return Ok(new { token });
-        }
-
-        private string GenerateJwtToken(Customer customer)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Role, customer.Role.ToString()),
-                new Claim(ClaimTypes.Name, customer.Email),
-                new Claim("FullName", $"{customer.FirstName} {customer.LastName}")
-            };
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: credentials
-                );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

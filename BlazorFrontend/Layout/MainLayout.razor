@@ -14,9 +14,9 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
+                <div class="collapse navbar-collapse d-flex justify-content-between">
                 <a class="navbar-brand text fw-bold fs-3" href="/">ynet</a>
-                <div class="collapse navbar-collapse">
-                    <div class="position-relative d-flex justify-content-center">
+                    <div class="position-relatives align-self-center">
                         <InputText @bind-Value="searchTerm" class="form-control w-100" placeholder="Search for a product..."
                         @oninput="OnInputChanged" />
                         @if (searchResults != null && searchResults.Any())
@@ -31,7 +31,7 @@
                             </ul>
                         }
                     </div>
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav end- ">
                         <AuthorizeView>
                             <Authorized>
                                 <li class="nav-item mt-2">

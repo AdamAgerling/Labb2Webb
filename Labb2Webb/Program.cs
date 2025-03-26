@@ -3,6 +3,7 @@ using System.Text;
 using Labb2Webb.Mapping;
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
+using Labb2Webb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -64,6 +65,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<JwtTokenGenerator>();
 
 builder.Services.AddDbContext<ECommerceContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
