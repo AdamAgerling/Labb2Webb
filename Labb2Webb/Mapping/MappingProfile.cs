@@ -19,7 +19,9 @@ namespace Labb2Webb.Mapping
             CreateMap<CreateProductDto, Product>().ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<Order, OrderDto>();
-            CreateMap<OrderItem, OrderItemDto>().ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName));
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Product.Price));
         }
     }
 }

@@ -6,6 +6,7 @@
 
         public int CustomerId { get; set; }
         public Customer Customer { get; set; }
+        public string CustomerEmail { get; set; }
 
         public DateTime OrderDate { get; set; } = DateTime.Now;
 

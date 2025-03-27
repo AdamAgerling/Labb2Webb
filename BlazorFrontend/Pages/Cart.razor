@@ -1,6 +1,78 @@
 ﻿@page "/cart"
+@using BlazorFrontend.Services
+@using Labb2Webb.Shared.DTOs
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject CartService CartService
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
 <h3>Cart</h3>
 
+@if (!CartService.CartItems.Any())
+{
+	<h4>Your cart is currently empty.</h4>
+}
+else {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Product</th>
+				<th>Quantity</th>
+				<th>Price</th>
+				<th>Total</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in CartService.CartItems) 
+			{
+				<tr>
+					<td>@item.Product.ProductName</td>
+					<td>@item.Quantity</td>
+					<td>@item.Product.Price</td>
+					<td>$@(item.Product.Price * item.Quantity)</td>
+					<td>
+						<button class="btn btn-danger btn-sm" @onclick="()=> RemoveItem(item.Product)">Remove</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+	<button class="btn btn-primary" @onclick="PlaceOrder">Place Order</button>
+}
 @code {
+
+	private async Task RemoveItem(ProductDto product) {
+		CartService.RemoveFromCart(product);
+	}
+
+	private async Task PlaceOrder() 
+	{
+		var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+		var loggedInEmail = authState.User.Identity.IsAuthenticated ? authState.User.FindFirst(ClaimTypes.Name)?.Value : "Test@notloggedinhehe.com";
+
+		var order = new OrderCreationDto
+			{
+				CustomerEmail = loggedInEmail,
+				OrderItems = CartService.CartItems.Select(i => new OrderItemCreationDto
+				{
+					ProductId = i.Product.Id,
+					Quantity = i.Quantity
+				}).ToList()
+			};
+
+			var response = await Http.PostAsJsonAsync("api/Order", order);
+			if(response.IsSuccessStatusCode)
+			{
+				CartService.ClearCart();
+				Navigation.NavigateTo("/orderconfirmation");
+			}
+			else
+			{
+				Console.WriteLine("Error placing the order");
+			}
+	}
 
 }

@@ -2,6 +2,7 @@
 @using BlazorFrontend.Services
 @using Labb2Webb.Shared.DTOs
 @inject CustomerService CustomerService
+@inject OrderService OrderService
 @inject NavigationManager Navigation
 @inject HttpClient Http
 
@@ -99,12 +100,12 @@ else
                 {
                     <div>
                         <div class="d-flex flex-column w-25">
-                        <label for="password1">New Password</label>
-                         <InputText id="password1" type="password" @bind-Value="updateCustomer.NewPassword" class="form-control d-inline w-auto ms-2" />
+                            <label for="password1">New Password</label>
+                            <InputText id="password1" type="password" @bind-Value="updateCustomer.NewPassword" class="form-control d-inline w-auto ms-2" />
                         </div>
                         <div class="d-flex flex-column w-25">
-                        <label for="password2">Confirm Password</label>
-                        <InputText id="password2" type="password" @bind-Value="updateCustomer.VerifyNewPassword" class="form-control d-inline w-auto ms-2" />
+                            <label for="password2">Confirm Password</label>
+                            <InputText id="password2" type="password" @bind-Value="updateCustomer.VerifyNewPassword" class="form-control d-inline w-auto ms-2" />
                         </div>
                     </div>
                     <button class="btn btn-sm btn-primary ms-2" @onclick="SavePassword">Save</button>
@@ -114,14 +115,42 @@ else
         </div>
     </div>
 }
-
+<div class="pt-5 d-flex justify-content-center">
 <h2>Order History</h2>
-
-<p>NYI</p>
+</div>
+@if (orders == null) {
+    <p><em>Loading orders...</em></p>
+} else if(!orders.Any()){
+    <p>You haven't place any orders yet</p>
+} else {
+    @foreach (var order in orders)
+    {
+        <div class="container">
+        <div class="card mb-3">
+            <div class="card-header">
+                Order #@order.Id - @order.OrderDate.ToString("g")
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    @foreach (var item in order.OrderItems)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@item.ProductName</span>
+                            <span>x @item.Amount</span>
+                            <span> $@(item.Amount * item.Price)</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        </div>
+    }
+}
 
 @code {
     private CustomerDto customerProfile;
     private UpdateCustomerDto updateCustomer;
+    private IEnumerable<OrderDto> orders;
     private string errorMessage;
 
     private bool isEditFirstName = false;
@@ -143,10 +172,11 @@ else
                     Cellphone = customerProfile.Cellphone,
                     Address = customerProfile.Address
                 };
+            orders = await OrderService.GetOrdersByCustomerEmailAsync(customerProfile.Email);
         }
         catch (Exception ex)
         {
-            errorMessage = "Error loading profile: " + ex.Message;
+            errorMessage = "Error loading profile or orders: " + ex.Message;
         }
     }
 

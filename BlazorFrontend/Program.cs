@@ -15,6 +15,7 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<OrderService>();
 
 builder.Services.AddAuthorizationCore();
 

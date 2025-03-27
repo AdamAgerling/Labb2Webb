@@ -13,11 +13,13 @@ namespace Labb2Webb.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerRepository _customerRepository;
+        private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
 
-        public CustomerController(ICustomerRepository customerRepository, IMapper mapper)
+        public CustomerController(ICustomerRepository customerRepository, IOrderRepository orderRepository, IMapper mapper)
         {
             _customerRepository = customerRepository;
+            _orderRepository = orderRepository;
             _mapper = mapper;
         }
 

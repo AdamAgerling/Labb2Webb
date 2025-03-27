@@ -2,6 +2,7 @@
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
 using Labb2Webb.Shared.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Labb2Webb.Controllers
@@ -12,11 +13,15 @@ namespace Labb2Webb.Controllers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMapper _mapper;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly ECommerceContext _context;
 
-        public OrderController(IOrderRepository orderRepository, IMapper mapper)
+        public OrderController(IOrderRepository orderRepository, IMapper mapper, ICustomerRepository customerRepository, ECommerceContext context)
         {
             _orderRepository = orderRepository;
             _mapper = mapper;
+            _customerRepository = customerRepository;
+            _context = context;
         }
 
         [HttpGet]
@@ -39,20 +44,44 @@ namespace Labb2Webb.Controllers
             return Ok(orderDto);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderDto orderDto)
+        [HttpGet("customer")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByCustomerEmail([FromQuery] string email)
         {
-            if (orderDto == null)
+            var orders = await _orderRepository.GetOrdersByCustomerEmailAsync(email);
+
+            if (orders == null)
             {
-                return BadRequest();
+                return NotFound("No orders found for this customer.");
+            }
+            var orderDtos = _mapper.Map<IEnumerable<OrderDto>>(orders);
+            return Ok(orderDtos);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderCreationDto orderDto)
+        {
+            var customer = await _customerRepository.GetByEmailAsync(orderDto.CustomerEmail);
+
+            if (customer == null)
+            {
+                return NotFound("The customer was not found!");
             }
 
-            var order = _mapper.Map<Order>(orderDto);
-            await _orderRepository.AddOrderAsync(order);
-
-            var createdOrderDto = _mapper.Map<OrderDto>(order);
-
-            return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, createdOrderDto);
+            var order = new Order
+            {
+                CustomerEmail = orderDto.CustomerEmail,
+                CustomerId = customer.Id,
+                OrderDate = DateTime.UtcNow,
+                OrderItems = orderDto.OrderItems.Select(oi => new OrderItem
+                {
+                    ProductId = oi.ProductId,
+                    Amount = oi.Quantity,
+                }).ToList()
+            };
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+            return Ok(order.Id);
         }
 
         [HttpPut("{id}")]
