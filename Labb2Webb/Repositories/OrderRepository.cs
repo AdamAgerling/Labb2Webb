@@ -52,7 +52,10 @@ namespace Labb2Webb.Repositories
 
         public async Task<IEnumerable<Order>> GetOrdersByCustomerEmailAsync(string email)
         {
-            return await _context.Orders.Include(o => o.OrderItems).Where(o => o.CustomerEmail.ToLower() == email.ToLower()).ToListAsync();
+            return await _context.Orders.Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Where(o => o.CustomerEmail.ToLower() == email.ToLower())
+                .ToListAsync();
         }
     }
 }
