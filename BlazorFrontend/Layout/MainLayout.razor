@@ -16,21 +16,32 @@
             <div class="container">
                 <div class="collapse navbar-collapse d-flex justify-content-between">
                    <a class="navbar-brand text fw-bold fs-3" href="/">ynet</a>
-                    <div class="position-relatives align-self-center">
-                        <InputText @bind-Value="searchTerm" class="form-control w-100" placeholder="Search for a product..."
-                        @oninput="OnInputChanged" />
-                        @if (searchResults != null && searchResults.Any())
+                    <div class="flex-grow-1 mx-3 position-relative">
+                        <InputText @bind-Value="searchTerm" class="form-control" placeholder="Search for a product..."
+                                   @oninput="OnInputChanged" />
+                        @if (searchResults != null)
                         {
-                            <ul class="list-group position-absolute w-100" style="top: 100%; z-index: 1000; cursor: pointer;">
-                                @foreach (var product in searchResults)
-                                {
-                                    <li class="list-group-item list-group-item-action" @onclick="() => NavigateToProduct(product)">
-                                        @product.ProductName
-                                    </li>
-                                }
-                            </ul>
+                            @if (searchResults.Any())
+                            {
+                                <ul class="list-group position-absolute w-100" style="top: 100%; z-index: 1000; cursor: pointer;">
+                                    @foreach (var product in searchResults)
+                                    {
+                                        <li class="list-group-item list-group-item-action" @onclick="() => NavigateToProduct(product)">
+                                            @product.ProductName
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <ul class="list-group position-absolute w-100" style="top: 100%; z-index: 1000; cursor: pointer;">
+                                    <li class="list-group-item">The product you're looking for does not exist</li>
+                                </ul>
+                            }
                         }
                     </div>
+                </div>
+                <div>
                     <ul class="navbar-nav">
                         <AuthorizeView>
                             <Authorized>
@@ -51,6 +62,7 @@
                             </NotAuthorized>
                         </AuthorizeView>
                         <li>
+                            @* TODO: IF NOT LOGGED IN, THE CART SHOULD REDIRECT YOU TO LOG IN.  *@
                             <NavLink class="nav-link d-flex align-items-center" href="cart">
                                 <button type="button" class="btn btn-success px-3">
                                     <i class="bi bi-cart3 pe-1"></i>
@@ -129,7 +141,13 @@
         }
         else
         {
-            searchResults = await ProductService.SearchProductsByNameAsync(searchTerm);
+            try 
+            {
+                searchResults = await ProductService.SearchProductsByNameAsync(searchTerm);
+            }
+            catch (Exception ex) {
+                searchResults = new List<ProductDto>();
+            }
         }
     }
 

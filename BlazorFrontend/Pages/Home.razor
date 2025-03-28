@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using Labb2Webb.Shared.DTOs
 @inject ProductService ProductService
+@inject NavigationManager Navigation
 
 <PageTitle>ynet</PageTitle>
 
@@ -37,7 +38,7 @@ else
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @foreach (var product in products)
         {
-            <div class="col">
+            <div class="col" style="cursor: pointer;" @onclick=" () => NavigateToProduct(product)">
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">@product.ProductName</h5>
@@ -59,6 +60,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         products = await ProductService.GetAllProductsAsync();
+    }
+
+    private void NavigateToProduct(ProductDto product)
+    {
+        Navigation.NavigateTo($"/product/{product.ProductNumber}/{product.ProductName}");
     }
 }
 

@@ -8,14 +8,15 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 
-<h3>Cart</h3>
+<h3 class="d-flex justify-content-center pt-5 pb-5 ">Cart</h3>
 
 @if (!CartService.CartItems.Any())
 {
 	<h4>Your cart is currently empty.</h4>
 }
 else {
-	<table class="table">
+	<div class="container">
+	<table class="table table-dark">
 		<thead>
 			<tr>
 				<th>Product</th>
@@ -38,9 +39,17 @@ else {
 					</td>
 				</tr>
 			}
+					<tr>
+						<td colspan="3" class="text-end fw-bold">Cart Total:</td>
+						<td class="fw-bold">
+							$@(CartService.CartItems.Sum(i => i.Product.Price * i.Quantity))
+						</td>
+						<td></td>
+					</tr>
 		</tbody>
 	</table>
 	<button class="btn btn-primary" @onclick="PlaceOrder">Place Order</button>
+	</div>
 }
 @code {
 
