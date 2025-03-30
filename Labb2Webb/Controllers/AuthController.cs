@@ -83,7 +83,15 @@ namespace Labb2Webb.Controllers
             }
 
             var token = _tokenGenerator.GenerateJwtToken(customer);
-            return Ok(new { token });
+            var fullName = $"{customer.FirstName} {customer.LastName}";
+
+            var response = new LoginResponseDto
+            {
+                Token = token,
+                FullName = fullName
+            };
+
+            return Ok(response);
         }
     }
 }

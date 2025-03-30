@@ -42,13 +42,15 @@ namespace BlazorFrontend.Providers
             }
         }
 
-        public void MarkUserAsAuthenticated(string email)
+        public void MarkUserAsAuthenticated(string email, string fullName)
         {
             var identity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Name, email),
+                new Claim("FullName", fullName),
             }, "apiauth");
             var user = new ClaimsPrincipal(identity);
+
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
         }
 

@@ -19,11 +19,20 @@ namespace Labb2Webb.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+            var firstName = string.IsNullOrWhiteSpace(customer.FirstName) ? "" : customer.FirstName;
+            var lastName = string.IsNullOrWhiteSpace(customer.LastName) ? "" : customer.LastName;
+            var fullName = (firstName + " " + lastName).Trim();
+
+            if (string.IsNullOrEmpty(fullName))
+            {
+                fullName = customer.Email;
+            }
+
             var claims = new[]
             {
                 new Claim(ClaimTypes.Role, customer.Role.ToString()),
                 new Claim(ClaimTypes.Name, customer.Email),
-                new Claim("FullName", $"{customer.FirstName} {customer.LastName}")
+                new Claim("FullName", fullName)
             };
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
