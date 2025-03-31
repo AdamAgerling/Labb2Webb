@@ -1,21 +1,21 @@
-﻿@page "/admin"
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@page "/admin"
+@attribute [Authorize(Roles = "Admin")]
 
-
-<h3>Admin Controller</h3>
+<h3 class="d-flex justify-content-center pt-5 pb-3">Admin Controller</h3>
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
-<NavLink class="col" href="admin/products">
-<div style="cursor: pointer;">
-    <div class="card h-100">
+
+    <div class="col" @onclick="@(() => Navigation.NavigateTo("admin/products"))">
+    <div class=" card h-100" style="cursor: pointer;">
         <div class="card-body">
             <h5 class="card-title">Products</h5>
-            <p class="card-text">
-                <strong>Edit products:</strong> hehe      
-            </p>
+            <p class="card-text">Create or Edit Products</p>
         </div>
     </div>
 </div>
-</NavLink>
     <NavLink class="col" href="admin/customers">
     <div style="cursor: pointer;">
         <div class="card h-100">

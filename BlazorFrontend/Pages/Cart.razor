@@ -52,6 +52,14 @@ else {
 	</div>
 }
 @code {
+	private bool isCartInitialized = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await CartService.InitializeCartAsync();
+		isCartInitialized = true;
+		StateHasChanged();
+	}
 
 	private async Task RemoveItem(ProductDto product) {
 		CartService.RemoveFromCart(product);

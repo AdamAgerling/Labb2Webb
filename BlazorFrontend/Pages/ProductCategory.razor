@@ -6,7 +6,7 @@
 @inject CartService CartService
 
 <PageTitle>ynet</PageTitle>
-<h3>@category</h3>
+<h3>@category.ToUpper()</h3>
 
 <div class="list-group">
     @if (Products == null || !Products.Any())
@@ -26,11 +26,12 @@
                     <small class="text-muted">@product.ProductDescription</small>
                     <div><strong>$@product.Price</strong></div>
                 </div>
-                <button class="btn btn-sm btn-success"
+                <button class="@GetButtonClass(product)"
+                        disabled="@IsButtonDisabled(product)"
                         @onclick:stopPropagation="true"
                         @onclick="(e) => AddToCart(product)">
                     <i class="bi bi-cart3 pe-1"></i>
-                    Add to cart
+                    @GetButtonText(product)
                 </button>
             </div>
         }
@@ -40,11 +41,31 @@
 @code {
     [Parameter] public string category { get; set; }
     [Parameter] public IEnumerable<ProductDto> Products { get; set; }
+    private ProductDto product;
 
     private void GoToProduct(string productNumber, string productName)
     {
         Navigation.NavigateTo($"/product/{productNumber}/{productName}");
     }
+
+    private string GetButtonClass(ProductDto product) =>
+        product.Status switch
+        {
+            ProductStatus.Discontinued => "btn btn-danger",
+            ProductStatus.Out_Of_Stock => "btn btn-secondary",
+            _ => "btn btn-success"
+        };
+
+    private string GetButtonText(ProductDto product) =>
+    product.Status switch
+    {
+        ProductStatus.Discontinued => "Discontinued",
+        ProductStatus.Out_Of_Stock => "Out of stock",
+        _ => "Add to cart"
+    };
+
+    private bool IsButtonDisabled(ProductDto product) =>
+    product.Status != ProductStatus.In_Stock;
 
     private void AddToCart(ProductDto product)
     {

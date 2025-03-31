@@ -28,4 +28,40 @@ public class ProductService
         var result = await _httpClient.GetFromJsonAsync<IEnumerable<ProductDto>>($"api/Product/search?name={productName}");
         return result ?? new List<ProductDto>();
     }
+
+    public async Task<ProductDto> GetProductByIdAsync(int id)
+    {
+        return await _httpClient.GetFromJsonAsync<ProductDto>($"api/Product/{id}");
+    }
+
+    public async Task<bool> DeleteProductAsync(int id)
+    {
+        var response = await _httpClient.DeleteAsync($"api/Product/{id}");
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> UpdateProductAsync(ProductDto product)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/Product/{product.Id}", product);
+
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> CreateProductAsync(CreateProductDto newProduct)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/Product", newProduct);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> MarkAsDiscontinued(int id)
+    {
+        var product = await GetProductByIdAsync(id);
+        if (product == null)
+        {
+            return false;
+        }
+        product.Status = ProductStatus.Discontinued;
+        return await UpdateProductAsync(product);
+    }
+
 }

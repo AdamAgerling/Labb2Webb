@@ -18,7 +18,8 @@ else
             <h5 class="card-title">@product.ProductName</h5>
             <p class="card-text">@product.ProductDescription</p>
             <p><strong>Price:</strong> $@product.Price</p>
-            <button class="btn btn-success" @onclick="AddToCart">Add to cart</button>
+            <p><strong>Status:</strong> @GetStatusText()</p>
+            <button class="@GetButtonClass()" disabled="@IsButtonDisabled()" @onclick="AddToCart">@GetButtonText()</button>
         </div>
     </div>
 }
@@ -27,6 +28,34 @@ else
     [Parameter] public string ProductNumber { get; set; }
     [Parameter] public string ProductName { get; set; }
     private ProductDto product;
+
+
+    private string GetButtonClass() =>
+        product.Status switch
+        {
+            ProductStatus.Discontinued => "btn btn-danger",
+            ProductStatus.Out_Of_Stock => "btn btn-secondary",
+            _ => "btn btn-success"
+        };
+
+    private string GetStatusText() =>
+    product.Status switch
+    {
+        ProductStatus.Discontinued => "Discontinued",
+        ProductStatus.Out_Of_Stock => "Out of stock",
+        _ => "In stock"
+    };
+    private string GetButtonText() =>
+    product.Status switch
+    {
+        ProductStatus.Discontinued => "Discontinued",
+        ProductStatus.Out_Of_Stock => "Out of stock",
+        _ => "Add to cart"
+    };
+
+    private bool IsButtonDisabled() =>
+    product.Status != ProductStatus.In_Stock;
+
 
     protected override async Task OnParametersSetAsync()
     {

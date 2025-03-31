@@ -1,0 +1,70 @@
+﻿@using Labb2Webb.Shared.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject ProductService ProductService
+@inject NavigationManager Navigation
+
+@page "/admin/products/create"
+@attribute [Authorize(Roles = "Admin")]
+<h3>Add Product</h3>
+
+
+	<EditForm Model="createProduct" OnValidSubmit="CreateProduct">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+	<div class="mb-3">
+		<label class="form-label">Product Number</label>
+		<InputText class="form-control" @bind-Value="createProduct.ProductNumber" />
+	</div>
+
+		<div class="mb-3">
+			<label class="form-label">New Product Name</label>
+			<InputText class="form-control" @bind-Value="createProduct.ProductName" />
+		</div>
+
+		<div class="mb-3">
+			<label class="form-label">Description</label>
+			<InputTextArea class="form-control" @bind-Value="createProduct.ProductDescription" />
+		</div>
+
+		<div class="mb-3">
+			<label class="form-label">Price</label>
+			<InputNumber class="form-control" @bind-Value="createProduct.Price" />
+		</div>
+
+		<div class="mb-3">
+			<label class="form-label">Category</label>
+			<InputText class="form-control" @bind-Value="createProduct.ProductCategory" />
+		</div>
+
+		<button type="submit" class="btn btn-primary">Create</button>
+		<button class="btn btn-secondary ms-2" @onclick="@(() => Navigation.NavigateTo("/admin/products"))">Cancel</button>
+	</EditForm>
+
+	@if (!string.IsNullOrEmpty(message))
+	{
+		<div class="alert alert-info mt-3">@message</div>
+	}
+
+
+@code {
+	private CreateProductDto createProduct = new();
+	private string message;
+
+	private async Task CreateProduct()
+	{
+		var success = await ProductService.CreateProductAsync(createProduct);
+		if (success)
+		{
+			message = "Product created successfully! :)";
+			Navigation.NavigateTo("/admin/products");
+		}
+		else
+		{
+			message = "Failed to create product. :(";
+		}
+	}
+
+}

@@ -33,6 +33,8 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
+    options.CustomSchemaIds(type => type.FullName);
+
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer eyJhbGciOiJI...\"",

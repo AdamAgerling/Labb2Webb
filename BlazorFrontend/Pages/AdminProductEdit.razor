@@ -1,0 +1,79 @@
+﻿@using Labb2Webb.Shared.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject ProductService ProductService
+@inject NavigationManager Navigation
+
+@page "/admin/products/edit/{Id:int}"
+@attribute [Authorize(Roles = "Admin")]
+<h3>Product Edit</h3>
+
+@if (product == null)
+{
+	<p><em>Loading product...</em></p>
+}
+else
+{
+	<EditForm Model="product" OnValidSubmit="SaveProduct">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+
+		<div class="mb-3">
+			<label class="form-label">Product Name</label>
+			<InputText class="form-control" @bind-Value="product.ProductName" />
+		</div>
+
+		<div class="mb-3">
+			<label class="form-label">Description</label>
+			<InputTextArea class="form-control" @bind-Value="product.ProductDescription" />
+		</div>
+
+		<div class="mb-3">
+			<label class="form-label">Price</label>
+			<InputNumber class="form-control" @bind-Value="product.Price" />
+		</div>
+
+		<div class="mb-3">
+			<label class="form-label">Category</label>
+			<InputText class="form-control" @bind-Value="product.ProductCategory" />
+		</div>
+
+		<div class="mb-3">
+			<label class="form-label">Status</label>
+			<InputSelect class="form-select" @bind-Value="product.Status">
+				@foreach (var status in Enum.GetValues<ProductStatus>())
+				{
+					<option value="@status">@status</option>
+				}
+			</InputSelect>
+		</div>
+
+		<button type="submit" class="btn btn-primary">Edit</button>
+		<button class="btn btn-secondary ms-2" @onclick="@(() => Navigation.NavigateTo("/admin/products"))">Cancel</button>
+	</EditForm>
+}
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+
+	private ProductDto product;
+
+	protected override async Task OnInitializedAsync()
+	{
+		product = await ProductService.GetProductByIdAsync(Id);
+	}
+
+	private async Task SaveProduct()
+	{
+		var success = await ProductService.UpdateProductAsync(product);
+		if (success)
+		{
+			Navigation.NavigateTo("/admin/products");
+		} else {
+			Console.WriteLine("Failed to save product.");
+		}
+	}
+
+}
