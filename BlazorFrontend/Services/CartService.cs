@@ -1,4 +1,6 @@
-﻿using Blazored.LocalStorage;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Blazored.LocalStorage;
 using Labb2Webb.Shared.DTOs;
 using Microsoft.JSInterop;
 
@@ -12,6 +14,8 @@ namespace BlazorFrontend.Services
         private readonly List<CartItem> _cartItems = new();
         public IReadOnlyList<CartItem> CartItems => _cartItems;
         public event Action OnChange;
+        private string _cartKey = "cartItems";
+
 
         public CartService(ILocalStorageService localStorage, IJSRuntime jSRuntime)
         {
@@ -21,7 +25,7 @@ namespace BlazorFrontend.Services
 
         private async Task SaveCartAsync()
         {
-            await _localStorage.SetItemAsync("cartItems", _cartItems);
+            await _localStorage.SetItemAsync(_cartKey, _cartItems);
             OnChange?.Invoke();
         }
 
@@ -29,19 +33,40 @@ namespace BlazorFrontend.Services
         {
             if (_isInitialized) return;
 
+            string email = null;
+            for (int i = 0; i < 10; i++)
+            {
+                email = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "authEmail");
+                if (!string.IsNullOrEmpty(email))
+                    break;
+
+                await Task.Delay(100);
+            }
+
+            _cartKey = !string.IsNullOrEmpty(email) ? $"cartItems_{email}" : "cartItems_guest";
+
             try
             {
-                var items = await _localStorage.GetItemAsync<List<CartItem>>("cartItems");
-                if (items != null)
+                var storedCart = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", _cartKey);
+                if (!string.IsNullOrEmpty(storedCart))
                 {
-                    _cartItems.Clear();
-                    _cartItems.AddRange(items);
+                    var items = JsonSerializer.Deserialize<List<CartItem>>(storedCart, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        Converters = { new JsonStringEnumConverter() }
+                    });
+
+                    if (items != null)
+                    {
+                        _cartItems.Clear();
+                        _cartItems.AddRange(items);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Cart deserialization failed: " + ex.Message);
-                await _localStorage.RemoveItemAsync("cartItems");
+                await _localStorage.RemoveItemAsync(_cartKey);
             }
 
             _isInitialized = true;

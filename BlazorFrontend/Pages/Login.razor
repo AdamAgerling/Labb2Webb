@@ -54,6 +54,7 @@
             {
                 var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
                 await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", result.Token);
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authEmail", loginModel.Email);
 
                 if (AuthStateProvider is CustomAuthStateProvider customAuthProvider)
                 {

@@ -15,10 +15,10 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <div class="collapse navbar-collapse d-flex justify-content-between">
-                   <a class="navbar-brand text fw-bold fs-3" href="/">ynet</a>
+                    <a class="navbar-brand text fw-bold fs-3" href="/">ynet</a>
                     <div class="flex-grow-1 mx-3 position-relative">
                         <InputText @bind-Value="searchTerm" class="form-control" placeholder="Search for a product..."
-                                   @oninput="OnInputChanged" />
+                        @oninput="OnInputChanged" />
                         @if (searchResults != null)
                         {
                             @if (searchResults.Any())
@@ -124,7 +124,11 @@
 
     private async Task Logout()
     {
+        var email = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "authEmail");
+        
         await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "authEmail");
+
         if (AuthStateProvider is CustomAuthStateProvider customAuthProvider)
         {
             customAuthProvider.MarkUserAsLoggedOut();
