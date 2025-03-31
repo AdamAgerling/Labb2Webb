@@ -7,6 +7,8 @@
 
 @page "/admin/products/edit/{Id:int}"
 @attribute [Authorize(Roles = "Admin")]
+<AuthorizeView Roles="Admin" Context="auth">
+    <Authorized>
 <h3>Product Edit</h3>
 
 @if (product == null)
@@ -53,16 +55,31 @@ else
 		<button class="btn btn-secondary ms-2" @onclick="@(() => Navigation.NavigateTo("/admin/products"))">Cancel</button>
 	</EditForm>
 }
+	</Authorized>
+	<NotAuthorized>
+		<h4>Access Denied</h4>
+		<p>You are not authorized to access this area.</p>
+	</NotAuthorized>
+</AuthorizeView>
 
 @code {
 	[Parameter]
 	public int Id { get; set; }
 
+	[Inject] private AuthenticationStateProvider AuthProvider { get; set; }
 	private ProductDto product;
 
 	protected override async Task OnInitializedAsync()
 	{
 		product = await ProductService.GetProductByIdAsync(Id);
+
+		var authState = await AuthProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+		if (!user.Identity.IsAuthenticated || !user.IsInRole("Admin"))
+		{
+			Navigation.NavigateTo("/not-authorized");
+		}
 	}
 
 	private async Task SaveProduct()

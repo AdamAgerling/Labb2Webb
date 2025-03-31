@@ -4,10 +4,12 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject ProductService ProductService
 @inject NavigationManager Navigation
-
 @page "/admin/products/create"
 @attribute [Authorize(Roles = "Admin")]
-<h3>Add Product</h3>
+
+<AuthorizeView Roles="Admin" Context="auth">
+    <Authorized>
+	<h3>Add Product</h3>
 
 
 	<EditForm Model="createProduct" OnValidSubmit="CreateProduct">
@@ -44,14 +46,31 @@
 	</EditForm>
 
 	@if (!string.IsNullOrEmpty(message))
-	{
-		<div class="alert alert-info mt-3">@message</div>
-	}
-
+		{
+			<div class="alert alert-info mt-3">@message</div>
+		}
+	</Authorized>
+	<NotAuthorized>
+		<h4>Access Denied</h4>
+		<p>You are not authorized to access this area.</p>
+	</NotAuthorized>
+</AuthorizeView>
 
 @code {
 	private CreateProductDto createProduct = new();
 	private string message;
+
+	[Inject] private AuthenticationStateProvider AuthProvider { get; set; }
+
+	protected override async Task OnInitializedAsync() {
+		var authState = await AuthProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+		if(!user.Identity.IsAuthenticated || !user.IsInRole("Admin"))
+		{
+			Navigation.NavigateTo("/not-authorized");
+		}
+	}
 
 	private async Task CreateProduct()
 	{
@@ -66,5 +85,4 @@
 			message = "Failed to create product. :(";
 		}
 	}
-
 }

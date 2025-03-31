@@ -3,7 +3,8 @@
 @inject NavigationManager Navigation
 @page "/admin"
 @attribute [Authorize(Roles = "Admin")]
-
+<AuthorizeView Roles="Admin" Context="auth">
+    <Authorized>
 <h3 class="d-flex justify-content-center pt-5 pb-3">Admin Controller</h3>
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -41,6 +42,23 @@
     </div>
 </NavLink>
 </div>
+	</Authorized>
+	<NotAuthorized>
+		<h4>Access Denied</h4>
+		<p>You are not authorized to access this area.</p>
+	</NotAuthorized>
+</AuthorizeView>
 @code {
+    [Inject] private AuthenticationStateProvider AuthProvider { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated || !user.IsInRole("Admin"))
+        {
+            Navigation.NavigateTo("/not-authorized");
+        }
+    }
 }

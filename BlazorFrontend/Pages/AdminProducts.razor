@@ -7,6 +7,8 @@
 @page "/admin/products"
 @attribute [Authorize(Roles = "Admin")]
 
+<AuthorizeView Roles="Admin" Context="auth">
+    <Authorized>
 <h3>Admin: Products</h3>
 
 <button class="btn btn-success mb-3" @onclick="@(() => Navigation.NavigateTo("/admin/products/create"))">
@@ -45,14 +47,29 @@
         </tbody>
     </table>
 }
-
+    </Authorized>
+    <NotAuthorized>
+        <h4>Access Denied</h4>
+        <p>You are not authorized to access this area.</p>
+    </NotAuthorized>
+</AuthorizeView>
 @code {
     private IEnumerable<ProductDto> products;
+
+    [Inject] private AuthenticationStateProvider AuthProvider { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         products = (await ProductService.GetAllProductsAsync()).ToList();
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated || !user.IsInRole("Admin"))
+        {
+            Navigation.NavigateTo("/not-authorized");
+        }
     }
+
 
     private async Task MarkAsDiscontinued(int id)
     {
