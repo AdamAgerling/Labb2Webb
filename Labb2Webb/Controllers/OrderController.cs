@@ -2,6 +2,7 @@
 using Labb2Webb.Models;
 using Labb2Webb.Repositories;
 using Labb2Webb.Shared.DTOs;
+using Labb2Webb.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -103,20 +104,20 @@ namespace Labb2Webb.Controllers
             return NoContent();
         }
 
-        //[HttpPut("{id}/status")]
-        //[Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> UpdateStatus(int id, [FromBody] OrderStatus newStatus)
-        //{
-        //    var order = await _orderRepository.GetOrderByIdAsync(id);
-        //    if (order == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpPut("{id}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] OrderStatus newStatus)
+        {
+            var order = await _orderRepository.GetOrderByIdAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
 
-        //    order.Status = newStatus;
-        //    await _orderRepository.UpdateOrderAsync(order);
-        //    return NoContent();
-        //}
+            order.Status = newStatus;
+            await _orderRepository.UpdateOrderAsync(order);
+            return NoContent();
+        }
 
         [HttpPost("{orderId}/items")]
         public async Task<IActionResult> AddOrderItem(int orderId, [FromBody] OrderItem orderItem)

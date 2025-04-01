@@ -1,4 +1,4 @@
-﻿using Labb2Webb.Shared.DTOs;
+﻿using Labb2Webb.Shared.Enums;
 
 namespace Labb2Webb.Shared.Helpers
 {

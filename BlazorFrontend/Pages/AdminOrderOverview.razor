@@ -1,0 +1,105 @@
+﻿@page "/admin/orders"
+@using BlazorFrontend.Services
+@using Labb2Webb.Shared.DTOs
+@using Labb2Webb.Shared.Enums
+@using Labb2Webb.Shared.Helpers
+@inject OrderService OrderService
+
+<h3 class="pt-3 pb-2">Admin: Orders</h3>
+
+<div class="btn-group mb-3">
+    <button class="btn @(selectedStatus == null ? "btn-primary" : "btn-outline-primary")"
+            @onclick="@(() => selectedStatus = null)">
+        All
+    </button>
+
+    @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+    {
+        <button class="btn @(selectedStatus == status ? "btn-primary" : "btn-outline-primary")"
+                @onclick="@(() => selectedStatus = status)">
+            @status
+        </button>
+    }
+</div>
+
+<input type="text" class="form-control mb-3" @bind="searchTerm" @bind:event="oninput" placeholder="Search by order ID or email..." />
+
+@if (orders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="accordion" id="orderAccordion">
+        @foreach (var order in FilteredOrders.OrderByDescending(o => o.OrderDate))
+        {
+            var headingId = $"heading-{order.Id}";
+            var collapseId = $"collapse-{order.Id}";
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="@headingId">
+                    <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#@collapseId"
+                            aria-expanded="false" aria-controls="@collapseId">
+                        <strong>Order #@order.Id</strong> - Order placed: @order.OrderDate.ToString("g") - Order placed by: @order.CustomerEmail - Status: 
+                        <span class="ms-2 badge @OrderStatusHelper.GetStatusClass(order.Status)">
+                            @order.Status
+                        </span>
+                    </button>
+                </h2>
+                <div id="@collapseId" class="accordion-collapse collapse"
+                     aria-labelledby="@headingId" data-bs-parent="#orderAccordion">
+                    <div class="accordion-body">
+                        <ul class="list-group mb-3">
+                            @foreach (var item in order.OrderItems)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@item.ProductName</span>
+                                    <span>x @item.Amount</span>
+                                    <span>$@(item.Price * item.Amount)</span>
+                                </li>
+                            }
+                        </ul>
+                        <strong>Total: $@(order.OrderItems.Sum(i => i.Price * i.Amount))</strong>
+
+                        <div class="mt-3">
+                            <span><strong>Update status:</strong></span>
+                            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                            {
+                                <button class="btn btn-sm me-1 @(order.Status == status ? "btn-success" : "btn-outline-secondary")"
+                                        @onclick="() => UpdateStatus(order.Id, status)">
+                                    @status
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IEnumerable<OrderDto> orders;
+    private string searchTerm = "";
+    private OrderStatus? selectedStatus = OrderStatus.Unhandled;
+
+    private IEnumerable<OrderDto> FilteredOrders =>
+        (orders ?? Enumerable.Empty<OrderDto>())
+            .Where(o =>
+                (selectedStatus == null || o.Status == selectedStatus) &&
+                (string.IsNullOrWhiteSpace(searchTerm) ||
+                 o.Id.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                 o.CustomerEmail.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            );
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetAllOrdersAsync();
+    }
+
+    private async Task UpdateStatus(int orderId, OrderStatus newStatus)
+    {
+        await OrderService.UpdateOrderStatusAsync(orderId, newStatus);
+        orders = await OrderService.GetAllOrdersAsync();
+    }
+}

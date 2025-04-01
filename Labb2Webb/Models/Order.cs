@@ -1,12 +1,8 @@
-﻿namespace Labb2Webb.Models
+﻿using Labb2Webb.Shared.Enums;
+
+namespace Labb2Webb.Models
 {
-    public enum OrderStatus
-    {
-        Unhandled,
-        Packing,
-        Sent,
-        Delivered
-    }
+
     public class Order
     {
         public int Id { get; set; }
