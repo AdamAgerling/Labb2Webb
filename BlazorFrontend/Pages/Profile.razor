@@ -1,6 +1,8 @@
 ﻿@page "/profile"
 @using BlazorFrontend.Services
 @using Labb2Webb.Shared.DTOs
+@using Microsoft.AspNetCore.Components.Authorization
+@using Labb2Webb.Shared.Helpers
 @inject CustomerService CustomerService
 @inject OrderService OrderService
 @inject NavigationManager Navigation
@@ -8,159 +10,176 @@
 
 <PageTitle>My Profile</PageTitle>
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
-else if (customerProfile == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="card bg-secondary">
-        <div class="card-body">
-            <h2 class="card-title">@customerProfile.FirstName @customerProfile.LastName</h2>
-            <div class="mb-2">
-                <strong>Email:</strong>
-                <span class="ms-2">@customerProfile.Email</span>
-            </div>
-
-            <div class="mb-2">
-                <strong>First Name:</strong>
-                @if (isEditFirstName)
-                {
-                    <InputText @bind-Value="updateCustomer.FirstName" class="form-control d-inline w-auto ms-2" />
-                    <button class="btn btn-sm btn-primary ms-2" @onclick="SaveFirstName">Save</button>
-                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelFirstNameEdit">Cancel</button>
-                }
-                else
-                {
-                    <span class="ms-2">@customerProfile.FirstName</span>
-                    <button class="btn btn-link btn-sm" @onclick="ToggleFirstNameEdit">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                }
-            </div>
-
-            <div class="mb-2">
-                <strong>Last Name:</strong>
-                @if (isEditLastName)
-                {
-                    <InputText @bind-Value="updateCustomer.LastName" class="form-control d-inline w-auto ms-2" />
-                    <button class="btn btn-sm btn-primary ms-2" @onclick="SaveLastName">Save</button>
-                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelLastNameEdit">Cancel</button>
-                }
-                else
-                {
-                    <span class="ms-2">@customerProfile.LastName</span>
-                    <button class="btn btn-link btn-sm" @onclick="ToggleLastNameEdit">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                }
-            </div>
-
-            <div class="mb-2">
-                <strong>Phone:</strong>
-                @if (isEditPhone)
-                {
-                    <InputText @bind-Value="updateCustomer.Cellphone" class="form-control d-inline w-auto ms-2" />
-                    <button class="btn btn-sm btn-primary ms-2" @onclick="SavePhone">Save</button>
-                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelPhoneEdit">Cancel</button>
-                }
-                else
-                {
-                    <span class="ms-2">@customerProfile.Cellphone</span>
-                    <button class="btn btn-link btn-sm" @onclick="TogglePhoneEdit">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                }
-            </div>
-
-            <div class="mb-2">
-                <strong>Address:</strong>
-                @if (isEditAddress)
-                {
-                    <InputText @bind-Value="updateCustomer.Address" class="form-control d-inline w-auto ms-2" />
-                    <button class="btn btn-sm btn-primary ms-2" @onclick="SaveAddress">Save</button>
-                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelAddressEdit">Cancel</button>
-                }
-                else
-                {
-                    <span class="ms-2">@customerProfile.Address</span>
-                    <button class="btn btn-link btn-sm" @onclick="ToggleAddressEdit">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                }
-            </div>
-
-            <div class="mb-2">
-                <button class="btn btn-link btn-sm mb-2" @onclick="TogglePasswordEdit"> Change password</button>
-                @if (isEditPassword)
-                {
-                    <div>
-                        <div class="d-flex flex-column w-25">
-                            <label for="password1">New Password</label>
-                            <InputText id="password1" type="password" @bind-Value="updateCustomer.NewPassword" class="form-control d-inline w-auto ms-2" />
-                        </div>
-                        <div class="d-flex flex-column w-25">
-                            <label for="password2">Confirm Password</label>
-                            <InputText id="password2" type="password" @bind-Value="updateCustomer.VerifyNewPassword" class="form-control d-inline w-auto ms-2" />
-                        </div>
-                    </div>
-                    <button class="btn btn-sm btn-primary ms-2" @onclick="SavePassword">Save</button>
-                    <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelPasswordEdit">Cancel</button>
-                }
-            </div>
-        </div>
-    </div>
-}
-<div class="pt-5 d-flex justify-content-center">
-    <h2>Order History</h2>
-</div>
-@if (orders == null) {
-    <p><em>Loading orders...</em></p>
-} else if(!orders.Any()){
-    <p>You haven't place any orders yet</p>
-} else 
-{
-    <div class="accordion" id="orderAccordion">
-        @foreach (var order in orders.OrderByDescending(o => o.OrderDate))
+<AuthorizeView>
+    <Authorized>
+        @if (!string.IsNullOrEmpty(errorMessage))
         {
-            var headingId = $"heading-{order.Id}";
-            var collapseId = $"collapse-{order.Id}";
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="@headingId">
-                    <button class="accordion-button collapsed" type="button"
-                            data-bs-toggle="collapse" data-bs-target="#@collapseId"
-                            aria-expanded="false" aria-controls="@collapseId">
-                        <strong>  Order #@order.Id - @order.OrderDate.ToString("g")</strong>
-                    </button>            
-                </h2>
-                <strong class="d-flex justify-content-end pe-5 mt-2">Total: $@(order.OrderItems.Sum(i => i.Price * i.Amount))</strong>
-                <div id="@collapseId" class="accordion-collapse collapse"
-                     aria-labelledby="@headingId" data-bs-parent="#orderAccordion">
-                    <div class="accordion-body">
-                        <ul class="list-group">
-                            @foreach (var item in order.OrderItems)
-                            {
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>@item.ProductName</span>
-                                    <span>x @item.Amount</span>
-                                    <span>$@(item.Price * item.Amount)</span>
-                                </li>
-                            }
-                        </ul>
-                      
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        else if (customerProfile == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="card bg-secondary">
+                <div class="card-body">
+                    <h2 class="card-title">@customerProfile.FirstName @customerProfile.LastName</h2>
+                    <div class="mb-2">
+                        <strong>Email:</strong>
+                        <span class="ms-2">@customerProfile.Email</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>First Name:</strong>
+                        @if (isEditFirstName)
+                        {
+                            <InputText @bind-Value="updateCustomer.FirstName" class="form-control d-inline w-auto ms-2" />
+                            <button class="btn btn-sm btn-primary ms-2" @onclick="SaveFirstName">Save</button>
+                            <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelFirstNameEdit">Cancel</button>
+                        }
+                        else
+                        {
+                            <span class="ms-2">@customerProfile.FirstName</span>
+                            <button class="btn btn-link btn-sm" @onclick="ToggleFirstNameEdit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        }
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Last Name:</strong>
+                        @if (isEditLastName)
+                        {
+                            <InputText @bind-Value="updateCustomer.LastName" class="form-control d-inline w-auto ms-2" />
+                            <button class="btn btn-sm btn-primary ms-2" @onclick="SaveLastName">Save</button>
+                            <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelLastNameEdit">Cancel</button>
+                        }
+                        else
+                        {
+                            <span class="ms-2">@customerProfile.LastName</span>
+                            <button class="btn btn-link btn-sm" @onclick="ToggleLastNameEdit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        }
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Phone:</strong>
+                        @if (isEditPhone)
+                        {
+                            <InputText @bind-Value="updateCustomer.Cellphone" class="form-control d-inline w-auto ms-2" />
+                            <button class="btn btn-sm btn-primary ms-2" @onclick="SavePhone">Save</button>
+                            <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelPhoneEdit">Cancel</button>
+                        }
+                        else
+                        {
+                            <span class="ms-2">@customerProfile.Cellphone</span>
+                            <button class="btn btn-link btn-sm" @onclick="TogglePhoneEdit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        }
+                    </div>
+
+                    <div class="mb-2">
+                        <strong>Address:</strong>
+                        @if (isEditAddress)
+                        {
+                            <InputText @bind-Value="updateCustomer.Address" class="form-control d-inline w-auto ms-2" />
+                            <button class="btn btn-sm btn-primary ms-2" @onclick="SaveAddress">Save</button>
+                            <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelAddressEdit">Cancel</button>
+                        }
+                        else
+                        {
+                            <span class="ms-2">@customerProfile.Address</span>
+                            <button class="btn btn-link btn-sm" @onclick="ToggleAddressEdit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        }
+                    </div>
+
+                    <div class="mb-2">
+                        <button class="btn btn-link btn-sm mb-2" @onclick="TogglePasswordEdit"> Change password</button>
+                        @if (isEditPassword)
+                        {
+                            <div>
+                                <div class="d-flex flex-column w-25">
+                                    <label for="password1">New Password</label>
+                                    <InputText id="password1" type="password" @bind-Value="updateCustomer.NewPassword" class="form-control d-inline w-auto ms-2" />
+                                </div>
+                                <div class="d-flex flex-column w-25">
+                                    <label for="password2">Confirm Password</label>
+                                    <InputText id="password2" type="password" @bind-Value="updateCustomer.VerifyNewPassword" class="form-control d-inline w-auto ms-2" />
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-primary ms-2" @onclick="SavePassword">Save</button>
+                            <button class="btn btn-sm btn-secondary ms-1" @onclick="CancelPasswordEdit">Cancel</button>
+                        }
                     </div>
                 </div>
             </div>
         }
-    </div>
+        <div class="pt-5 d-flex justify-content-center">
+            <h2>Order History</h2>
+        </div>
+        @if (orders == null) {
+            <p><em>Loading orders...</em></p>
+        } else if(!orders.Any()){
+            <p>You haven't place any orders yet</p>
+        } else 
+        {
+            <div class="accordion" id="orderAccordion">
+                @foreach (var order in orders.OrderByDescending(o => o.OrderDate))
+                {
+                    var headingId = $"heading-{order.Id}";
+                    var collapseId = $"collapse-{order.Id}";
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="@headingId">
+                            <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#@collapseId"
+                            aria-expanded="false" aria-controls="@collapseId">
+                                <strong>  Order #@order.Id - @order.OrderDate.ToString("g")
+                                    <span class="ms-2 badge @OrderStatusHelper.GetStatusClass(order.Status)">@order.Status</span>
+                                </strong>
+                            </button>            
+                        </h2>
+                        <strong class="d-flex justify-content-end pe-5 mt-2">Total: $@(order.OrderItems.Sum(i => i.Price * i.Amount))</strong>
+                        <div id="@collapseId" class="accordion-collapse collapse"
+                        aria-labelledby="@headingId" data-bs-parent="#orderAccordion">
+                            <div class="accordion-body">
+                                <ul class="list-group">
+                                    @foreach (var item in order.OrderItems)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>@item.ProductName</span>
+                                            <span>x @item.Amount</span>
+                                            <span>$@(item.Price * item.Amount)</span>
+                                        </li>
+                                    }
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <div class="d-flex justify-content-center pt-5">
+            <div>
+                <h2> Access Denied</h2>
+
+                <p>You need to log in to visit your profile.</p>
 
 
-   
-}
+                <div class="mt-3">
+                    <a href="/login" class="px-5">Navigate to login</a>
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private CustomerDto customerProfile;

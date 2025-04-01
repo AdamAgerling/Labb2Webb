@@ -51,6 +51,15 @@
                                 <li class="nav-item mt-2">
                                     <button class="btn btn-link nav-link" @onclick="Logout">Logout</button>
                                 </li>
+                                <li>
+                                    <NavLink class="nav-link d-flex align-items-center" href="cart">
+                                        <button type="button" class="btn btn-success px-3">
+                                            <i class="bi bi-cart3 pe-1"></i>
+                                            Cart
+                                        </button>
+                                    </NavLink>
+
+                                </li>
                             </Authorized>
                             <NotAuthorized>
                                 <li class="nav-item mt-2">
@@ -61,16 +70,7 @@
                                 </li>
                             </NotAuthorized>
                         </AuthorizeView>
-                        <li>
-                            @* TODO: IF NOT LOGGED IN, THE CART SHOULD REDIRECT YOU TO LOG IN.  *@
-                            <NavLink class="nav-link d-flex align-items-center" href="cart">
-                                <button type="button" class="btn btn-success px-3">
-                                    <i class="bi bi-cart3 pe-1"></i>
-                                    Cart
-                                </button>
-                            </NavLink>
 
-                        </li>
                     </ul>
                 </div>
             </div>

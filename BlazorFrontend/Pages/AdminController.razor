@@ -1,8 +1,7 @@
-﻿@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager Navigation
 @page "/admin"
-@attribute [Authorize(Roles = "Admin")]
+
 <AuthorizeView Roles="Admin" Context="auth">
     <Authorized>
 <h3 class="d-flex justify-content-center pt-5 pb-3">Admin Controller</h3>
@@ -17,30 +16,22 @@
         </div>
     </div>
 </div>
-    <NavLink class="col" href="admin/customers">
-    <div style="cursor: pointer;">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Customer overview</h5>
-                <p class="card-text">
-                   Hej hej
-                </p>
+            <div class="col" @onclick="@(() => Navigation.NavigateTo("admin/customers"))">
+                <div class=" card h-100" style="cursor: pointer;">
+                    <div class="card-body">
+                        <h5 class="card-title">Customers</h5>
+                        <p class="card-text">List of customers</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</NavLink>
-    <NavLink class="col" href="admin/orders">
-    <div  style="cursor: pointer;">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Products</h5>
-                <p class="card-text">
-                    <strong>Edit products:</strong> hehe
-                </p>
+            <div class="col" @onclick="@(() => Navigation.NavigateTo("admin/orders"))">
+                <div class=" card h-100" style="cursor: pointer;">
+                    <div class="card-body">
+                        <h5 class="card-title">Orders</h5>
+                        <p class="card-text">List of all orders</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</NavLink>
 </div>
 	</Authorized>
 	<NotAuthorized>

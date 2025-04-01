@@ -31,16 +31,17 @@ namespace Labb2Webb.Controllers
             return Ok(customers);
         }
 
-        [HttpGet("email")]
+        [HttpGet("{email}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Customer>> GetCustomerByEmail(string email)
+        public async Task<ActionResult<CustomerDto>> GetCustomerByEmail(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
             if (customer == null)
             {
                 return NotFound();
             }
-            return Ok(customer);
+            var dto = _mapper.Map<CustomerDto>(customer);
+            return Ok(dto);
         }
 
         [HttpGet("profile")]

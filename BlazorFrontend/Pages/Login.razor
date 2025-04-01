@@ -10,10 +10,11 @@
 @using Microsoft.AspNetCore.Components.Authorization
 
 <PageTitle>ynet Login</PageTitle>
+<div class="d-flex justify-content-center pt-5">
 
 <div class="container mt-5 pt-5">
     <div>
-        <h2 class="align-content-center">Login</h2>
+        <h2 class="d-flex justify-content-center">Login</h2>
     </div>
     @if (!string.IsNullOrEmpty(errorMessage))
     {
@@ -33,13 +34,16 @@
             <label for="inputPassword1">Password</label>
             <InputText id="inputPassword1" class="form-control" @bind-Value="loginModel.Password" type="password" placeholder="Password" />
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
+            <div class="d-flex justify-content-center pt-3">
+
+        <button type="submit" class="btn btn-primary ">Login</button>
+        </div>
     </EditForm>
-
+        <div class="d-flex justify-content-center pt-3">
     <a href="/createaccount" class="px-5 ">Create an Account</a>
-
+        </div>
 </div>
-
+</div>
 @code {
     private LoginModel loginModel = new();
     private string errorMessage;

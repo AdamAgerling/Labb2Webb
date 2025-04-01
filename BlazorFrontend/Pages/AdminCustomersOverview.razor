@@ -1,0 +1,65 @@
+﻿@page "/admin/customers"
+@using BlazorFrontend.Services
+@using Labb2Webb.Shared.DTOs
+@using Microsoft.AspNetCore.Components.Authorization
+@inject CustomerService CustomerService
+@inject NavigationManager Navigation
+
+<AuthorizeView Roles="Admin" Context="auth">
+    <Authorized>
+<h3>Customer Overview</h3>
+
+@if (CustomerService == null)
+{
+	<p><em>Loading...</em></p>
+}
+else {
+            <input type="text" class="form-control mb-3" @bind="searchTerm" @bind:event="oninput" placeholder="Search customer by email..." />
+
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var customer in FilteredCustomers)
+                    {
+                        <tr @onclick="() => NavigateToCustomer(customer.Email)" style="cursor: pointer;">
+                            <td>@customer.FirstName @customer.LastName</td>
+                            <td>@customer.Email</td>
+                            <td><i class="bi bi-chevron-right"></i></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+}
+	</Authorized>
+	<NotAuthorized>
+		<h4>Access Denied</h4>
+		<p>You are not authorized to access this area.</p>
+	</NotAuthorized>
+</AuthorizeView>
+@code {
+	private IEnumerable<CustomerDto> customers;
+    private string searchTerm = "";
+
+    private IEnumerable<CustomerDto> FilteredCustomers =>
+     string.IsNullOrWhiteSpace(searchTerm)
+         ? customers ?? Enumerable.Empty<CustomerDto>()
+         : (customers ?? Enumerable.Empty<CustomerDto>())
+             .Where(c => c.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+	protected override async Task OnInitializedAsync()
+	{
+		customers = await CustomerService.GetAllCustomersAsync();
+	}
+
+	private void NavigateToCustomer(string email)
+	{
+		Navigation.NavigateTo($"/admin/customer/{email}");
+	}
+
+}

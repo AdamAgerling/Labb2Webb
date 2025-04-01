@@ -31,5 +31,10 @@ namespace BlazorFrontend.Services
         {
             return await _httpClient.PutAsJsonAsync($"api/customer/{updateDto.Email}", updateDto);
         }
+
+        public async Task<List<CustomerDto>> GetAllCustomersAsync()
+        {
+            return await _httpClient.GetFromJsonAsync<List<CustomerDto>>("api/Customer");
+        }
     }
 }
