@@ -58,7 +58,10 @@ Welcome to **ynet** (yes, obviously a joke – if you know, you know 😉) – a
    ```bash
    dotnet ef database update
    ```
-4. Start the API-server:
+4. Open Configure Startup Projects and set Labb2Webb action to Start then do the same with BlazorFrontend. Then you just run the program like normal.
+   - ⚠️IF you do this, you don't have to do step 5. And you can skip step 1 and 2 in Frontend (blazor)⚠️
+   
+6. Start the API-server:
    ```bash
    dotnet run
    ```
