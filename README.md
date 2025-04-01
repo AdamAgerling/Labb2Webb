@@ -1,4 +1,4 @@
-# 🛒 ynet – E-handelsapplikation (.NET 8 + Blazor WebAssembly)
+# 🛒 ynet – E-commerce Application (.NET 8 + Blazor WebAssembly)
 
 Welcome to **ynet** (yes, obviously a joke – if you know, you know 😉) – a complete e-commerce solution built with **ASP.NET Core Web API** and **Blazor WebAssembly**. This project includes full product management, customer registration, order handling, and an admin panel secured with role-based authentication using JWT.  
 ⚠️ Just a heads-up: the app isn't fully responsive – so maybe don’t play too much with the screen size, alright? 😅
